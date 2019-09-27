@@ -66,11 +66,12 @@ def helloworld():
 def main():
     """
     The main() function will run on your local machine
-    and start two jobs on AegisBlade with the above functions.
+    and start a job on AegisBlade running the helloworld() function.
     """
 
     # Calling aegisblade.run() will start the job on a server managed by AegisBlade.
     # AegisBlade will handle provisioning hosts, deploying your code, and running it.
+    print("Creating Aegisblade job...")
     job = aegisblade.run(lambda: helloworld())
     
     # Return values are serialized and can be fetched when the job is finished.
@@ -83,15 +84,11 @@ def main():
     print("RETURN VALUE")
     print(job_return_value)
 
-    assert "Hello World" in job_return_value
-
     # Logs are stored and can also be fetched after the job is finished.
     job_logs = job.get_logs()
 
     print("LOGS:")
     print(job_logs)
-
-    assert "hostname" in job_logs
 
 
 # Using the __name__ == "__main__" idiom to only run main when this script
