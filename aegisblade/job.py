@@ -200,7 +200,7 @@ class AegisBladeJob(object):
         if not self._has_error(status):
             return False
 
-        return 'application failed to build' in status.error_description.lower()
+        return 'application failed to build' in status.errorDescription.lower()
 
     def _raise_job_error_if_applicable(self, status):
         if self._has_application_error(status) and self.application is not None:
