@@ -45,53 +45,64 @@ pip3 install aegisblade
 
 ## Hello World Example
 
-```javascript
-const {aegisblade} = require('aegisblade');
-const os = require("os");
+```python
+import socket
 
-/**
- * In this example the `helloWorld()` function will be run on a
- * server using AegisBlade. 
- */
-async function helloWorld() {
-    console.log(`The server's hostname is ${os.hostname()}`);
+from aegisblade import aegisblade
 
-    return `Hello World from ${os.hostname()}`;
-}
 
-// Any target function to be run on AegisBlade must be exported.
-module.exports = {helloWorld};
+def helloworld():
+    """
+    In this example we will deploy & run this function
+        inside of AegisBlade.
+    """
+    hostname = socket.gethostname()
 
-/**
- * The `main()` function will run on your local machine
- * and start the job running the `helloWorld()` function
- * on a server using AegisBlade.
- */
-async function main() {
-    let job = await aegisblade.run(helloWorld);
+    print("The server's hostname is {0}".format(hostname))
+
+    return "Hello World from {0}".format(hostname)
+
+
+def main():
+    """
+    The main() function will run on your local machine
+    and start two jobs on AegisBlade with the above functions.
+    """
+
+    # Calling aegisblade.run() will start the job on a server managed by AegisBlade.
+    # AegisBlade will handle provisioning hosts, deploying your code, and running it.
+    job = aegisblade.run(lambda: helloworld())
     
-    console.log(`Job Id: ${job.id}`);
-    console.log("Waiting for the job to finish running...");
+    # Return values are serialized and can be fetched when the job is finished.
+    #
+    # Calling .get_return_value() will wait for the job to finish, 
+    #   then get the return value.
+    print("Waiting for job to finish...")
+    job_return_value = job.get_return_value()
 
-    let jobReturnValue = await job.getReturnValue();
-    let jobLogs = await job.getLogs();
+    print("RETURN VALUE")
+    print(job_return_value)
 
-    console.log(`Job Return Value: ${jobReturnValue}`);
-    console.log(`Job Logs: ${jobLogs}`);
-}
+    assert "Hello World" in job_return_value
 
-//  Using the `require.main === module` idiom to only run main when this script
-//    is called directly is especially important when using AegisBlade to prevent
-//    infinite loops of jobs creating jobs.
-if (require.main === module) {
-    (async () => {
-        try {
-            await main();
-        } catch (err) {
-            console.error(err);
-        }
-    })();
-}
+    # Logs are stored and can also be fetched after the job is finished.
+    job_logs = job.get_logs()
+
+    print("LOGS:")
+    print(job_logs)
+
+    assert "hostname" in job_logs
+
+
+# Using the __name__ == "__main__" idiom to only run main when this script
+#   is called directly is especially important when using AegisBlade.
+#
+# This script may be imported by the AegisBlade runtime, and without the 
+#   protective check of __name__, main() would be called inside the job 
+#   potentially causing an infinite loop of jobs starting more jobs.
+if __name__ == "__main__":
+    main()
+
 ```
 
 ## Note on Python 2
