@@ -67,6 +67,8 @@ setup(
         'requests==2.20.1', 'typing==3.6.4', 'cloudpickle==1.2.2'
     ],
 
+    python_requires=">=2.7",
+
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
