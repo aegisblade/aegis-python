@@ -58,7 +58,7 @@ setup(
     },
 
     install_requires=[
-        'requests==2.18.4', 'typing==3.6.4', 'cloudpickle==1.2.2'
+        'requests==2.20.0', 'typing==3.6.4', 'cloudpickle==1.2.2'
     ],
 
     packages=find_packages(),
