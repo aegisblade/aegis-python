@@ -23,7 +23,7 @@
     ·
     <a href="https://www.aegisblade.com/account/register">Sign Up for an API Key</a>
     ·
-    <a href="https://github.com/aegisblade/aegis-nodejs/issues">Report Bug</a>
+    <a href="https://github.com/aegisblade/aegis-python/issues">Report Bug</a>
   </p>
 </p>
 
