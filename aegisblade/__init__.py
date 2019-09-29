@@ -31,9 +31,10 @@ def hello_world():
     print("Hello World")
     return "Hello World"
 
-job = aegisblade.run(lambda: do_work())
+if __name__ == '__main__':
+    job = aegisblade.run(lambda: hello_world())
 
-assert "Hello World" in job.get_return_value()
+    assert "Hello World" in job.get_return_value()
 ```
 
 """
