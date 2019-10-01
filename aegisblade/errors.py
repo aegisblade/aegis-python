@@ -23,7 +23,7 @@ class ApplicationBuildError(Exception):
         self.application_id = application_id
         self.error_description = error_description
 
-        self.message = "An Application failed to build. File an issue at https://github.com/brthor/aegisblade if it persists. " \
+        self.message = "An Application failed to build. File an issue at https://github.com/aegisblade/aegisblade if it persists. " \
                        "\n(Error Description: {0})" \
                        "\n(Application Id:{1})".format(self.error_description, self.application_id)
 
@@ -38,7 +38,7 @@ class JobError(Exception):
         self.job_id = job_id
         self.error_description = error_description
 
-        self.message = "An Job failed to run. File an issue at https://github.com/brthor/aegisblade if it persists. " \
+        self.message = "A Job failed to run. File an issue at https://github.com/aegisblade/aegisblade if it persists. " \
                        "\n(Error Description: {0})" \
                        "\n(Job Id:{1})".format(self.error_description, self.job_id)
 
