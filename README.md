@@ -117,6 +117,6 @@ Due to it's popular usage though, we will likely continue to support a Python 2.
 
 AegisBlade - [@aegisbladehq](https://twitter.com/aegisbladehq) - welovedevs@aegisblade.com
 
-Project Link: [https://github.com/aegisblade/aegis-nodejs](https://github.com/aegisblade/aegis-nodejs)
+Project Link: [https://github.com/aegisblade/aegis-python](https://github.com/aegisblade/aegis-python)
 
 
