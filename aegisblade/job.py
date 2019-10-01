@@ -55,7 +55,9 @@ class AegisBladeJob(object):
     @classmethod
     def create(cls, client, job_id):
         # type: (AegisBladeClient, str) -> AegisBladeJob
-        """Creates an AegisBladeJob instance from a job id.
+        """Usage of this method is not recommended. Use `aegisblade.client.AegisBladeClient.job()` instead.
+        
+        Creates an AegisBladeJob instance from a job id.
 
         This method will contact the API to fetch information about the job
         then return an AegisBladeJob instance.

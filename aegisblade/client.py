@@ -94,6 +94,23 @@ class AegisBladeClient(object):
         """
         self._service_url = service_url
 
+    def job(self, job_id):
+        # type: (str) -> AegisBladeJob
+        """
+        Used to get a `aegisblade.job.AegisBladeJob` instance for an already existing job.
+        
+        This method will contact the API to fetch information about the job then return an `aegisblade.job.AegisBladeJob` instance.
+
+        Args:
+            client (aegisblade.client.AegisBladeClient): The AegisBlade client. The default client is imported using 'from aegisblade import aegisblade'.
+            job_id (str): The id of the job corresponding to the `AegisBladeJob.id` instance property.
+
+        Raises:
+            `aegisblade.errors.JobNotFoundError`: A job with the specified id was not found.
+        """
+        return AegisBladeJob.create(self, job_id)
+        
+
     def data(self, data_store_name):
         # type: (string) -> DataStore
         """Used to access the data store api. The data store can be used to 
