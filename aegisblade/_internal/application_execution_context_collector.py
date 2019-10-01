@@ -15,6 +15,7 @@ from aegisblade._internal.application_context_file import ApplicationContextFile
 from aegisblade._internal.application_execution_context import ApplicationExecutionContext
 from aegisblade._internal.application_package_info import ApplicationPackageInfo
 from aegisblade._internal.cached_std_lib_modules import get_std_lib_modules
+from aegisblade._internal.file_utils import normalize_path, is_subdir
 from aegisblade._internal.command import Command
 from aegisblade.__version__ import __version__
 
@@ -115,21 +116,9 @@ class _ApplicationExecutionContextCollector(object):
             name, path = module
             relative_path_to_root = os.path.relpath(path, root_path)
 
-            if not self.is_subdir(path, root_path):
-                found_library = None
-                if libraries:
-                    for _, library_path in libraries.items():
-                        if path.startswith(library_path):
-                            Trace.verbose("[INFO] Adding library module to aegisblade_lib {0} ({1})".format(path, library_path))
-                            found_library = library_path
-                            break
-
-                if found_library:
-                    lib_relative_path = os.path.relpath(path, found_library)
-                    relative_path_to_root = os.path.join('aegisblade_lib', lib_relative_path)
-                else:
-                    Trace.verbose("WARNING. Skipping module outside project root directory. ({0})".format(path))
-                    continue
+            if not is_subdir(path, root_path):
+                Trace.verbose("WARNING. Skipping module outside project root directory. ({0})".format(path))
+                continue
 
             file_contents = None
             with open(path, 'rb') as f:
@@ -141,40 +130,46 @@ class _ApplicationExecutionContextCollector(object):
 
             files.append(ApplicationContextFile(path, relative_path_to_root, file_hash, file_contents, len(file_contents)))
 
+        if libraries:
+            for _, library_dir in libraries.items():
+                files.extend(self.get_library_files(library_dir))
+
         return files
 
-    def is_subdir(self, test_path, root_path):
-        path = os.path.realpath(test_path)
-        directory = os.path.realpath(root_path)
+    def get_library_files(self, library_dir):
+        if not os.path.exists(library_dir):
+            raise ValueError("Library directory does not exist: " + str(library_dir))
 
-        relative = os.path.relpath(path, directory)
-        return not (relative == os.pardir or relative.startswith(os.pardir + os.sep))
+        if not os.path.isdir(library_dir):
+            raise ValueError("Library path exists but is not a directory: " + str(library_dir))
 
-    def normalize_path(self, path_to_normalize):
-        if path_to_normalize is None:
-            return None
+        library_modules = self.get_modules_in_directory(library_dir)
+        library_files = []
 
-        normalized_path = os.path.normpath(
-            os.path.normcase(
-                os.path.abspath(
-                    os.path.expanduser(
-                        path_to_normalize
-                    )
-                )
-            )
-        )
+        for name, path in library_modules.items():
+            relative_path_to_root = os.path.relpath(path, library_dir)
 
-        return normalized_path
+            file_contents = None
+            with open(path, 'rb') as f:
+                file_contents = f.read()
+
+            file_hash = hashlib.sha256()
+            file_hash.update(file_contents)
+            file_hash = file_hash.hexdigest()
+
+            library_files.append(ApplicationContextFile(path, relative_path_to_root, file_hash, file_contents, len(file_contents)))
+
+        return library_files
 
     def get_filtered_sys_path(self):
         non_included_paths = []
 
         python_path = os.path.dirname(sys.executable)
-        non_included_paths.append(self.normalize_path(python_path))
+        non_included_paths.append(normalize_path(python_path))
 
         virtual_env_path = os.environ.get("VIRTUAL_ENV", None)
         if virtual_env_path:
-            non_included_paths.append(self.normalize_path(virtual_env_path))
+            non_included_paths.append(normalize_path(virtual_env_path))
 
         try:
             homebrew_prefix_cmd = Command("brew", ["--prefix"])\
@@ -184,14 +179,14 @@ class _ApplicationExecutionContextCollector(object):
             if not homebrew_prefix_cmd.failed():
                 homebrew_prefix = homebrew_prefix_cmd.stdout.replace("\n", "")
                 homebrew_path = homebrew_prefix + "/Cellar"
-                non_included_paths.append(self.normalize_path(homebrew_path))
+                non_included_paths.append(normalize_path(homebrew_path))
 
         except OSError:
             # Expected on non-mac or non-brew systems
             pass
 
         path_components = filter(os.path.isdir,
-                                map(self.normalize_path,
+                                map(normalize_path,
                                     sys.path[:]))
 
         for filtered_path in non_included_paths:
@@ -207,7 +202,6 @@ class _ApplicationExecutionContextCollector(object):
 
     def get_application_modules(self):
         path = self.get_filtered_sys_path()
-        # print("path: " + str(path))
 
         modules = {}
 
@@ -218,7 +212,7 @@ class _ApplicationExecutionContextCollector(object):
         items.sort()
         return items
 
-    def get_modules_in_directory(self, directory, d=1):
+    def get_modules_in_directory(self, directory, depth=1):
         # get modules in a given directory
         modules = {}
         for f in os.listdir(directory):
@@ -240,10 +234,9 @@ class _ApplicationExecutionContextCollector(object):
             elif os.path.isdir(f):
                 m = os.path.basename(f)
                 if os.path.isfile(os.path.join(f, "__init__.py")):
-                    for mm, f in self.get_modules_in_directory(f, d=d+1).items():
+                    for mm, f in self.get_modules_in_directory(f, depth=depth+1).items():
                         modules[m + "." + mm] = f
         return modules
 
     def find_project_root(self):
-        # TODO: Is there a better choice than CWD?
-        return self.normalize_path(os.getcwd())
+        return normalize_path(os.getcwd())

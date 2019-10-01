@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any
 import os
 
 from aegisblade._internal.environment import Environment
+from aegisblade._internal.file_utils import normalize_path, is_subdir
 
 try:
   basestring
@@ -213,18 +214,16 @@ class JobConfig(object):
         if not isinstance(library_path, basestring):
             raise TypeError('library_path must a str-like type')
 
-        library_path = os.path.normpath(
-            os.path.normcase(
-                os.path.abspath(
-                    os.path.expanduser(
-                        library_path
-                    ))))
+        library_path = normalize_path(library_path)
 
         if not (os.path.exists(library_path)):
             raise ValueError(library_path + ' not found')
 
         if not os.path.isdir(library_path):
             raise ValueError(library_path + ' is not a directory')
+
+        if is_subdir(library_path, normalize_path(os.getcwd())):
+            raise ValueError('Libraries must not be subdirectories of the project root. ' + library_path + ' is a subdirectory of the project root.')
 
         self.libraries[library_package] = library_path
 

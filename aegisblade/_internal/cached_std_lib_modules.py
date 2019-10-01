@@ -20,7 +20,7 @@ def get_python_version_std_lib_modules(python_version):
     if not os.path.isfile(target_file):
         raise Exception(
             "Python version {0} not yet supported. "
-            "See https://github.com/brthor/aegisblade for more info.".format(python_version))
+            "See https://github.com/aegisblade/aegisblade for more info.".format(python_version))
 
     file_module = imp.load_source('stdlib', target_file)
     return file_module.__content__
