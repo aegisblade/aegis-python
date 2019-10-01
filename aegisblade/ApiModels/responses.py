@@ -26,7 +26,7 @@ class CreateApplicationResponse(object):
 
 
 class CreateJobResponse(object):
-    """Parsed API response when creating an job."""
+    """Parsed API response when creating a job."""
 
     error = None  # type: bool
     """`bool`: Set to True if an error occurred."""

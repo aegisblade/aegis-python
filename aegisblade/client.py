@@ -23,6 +23,7 @@ from aegisblade.job_config import JobConfig
 from aegisblade.data_store import DataStore
 
 from aegisblade._internal.environment import Environment
+from aegisblade._internal.json_wrapper import json_encode
 
 class AegisBladeClient(object):
     """AegisBlade client. Provides easy methods for starting jobs,
@@ -185,6 +186,9 @@ class AegisBladeClient(object):
 
         job_config = job_config or JobConfig()
 
+        Trace.debug("Launching job with job config: ")
+        Trace.debug(job_config.__dict__)
+
         task_info = TaskInfo(remotely_executed_callable)
         application_execution_context = _ApplicationExecutionContextCollector().collect(job_config.libraries)
 
@@ -222,6 +226,10 @@ class AegisBladeClient(object):
 
     def _create_application(self, api_consumer, application_execution_context, job_config):
         # type: (AegisBladeApiConsumer, ApplicationExecutionContext, JobConfig) -> CreateApplicationResponse
+
+        Trace.verbose("[INFO] Creating Application... ")
+        Trace.debug(json_encode(application_execution_context))
+
         create_application_response = api_consumer.create_application(application_execution_context, job_config)
 
         if create_application_response.error:
@@ -245,7 +253,7 @@ class AegisBladeClient(object):
 
     def _create_job(self, api_consumer, task_info, create_application_response, job_config):
         # type: (AegisBladeApiConsumer, TaskInfo, CreateApplicationResponse, JobConfig) -> CreateJobResponse
-        Trace.verbose("[INFO] Creating Job.")
+        Trace.verbose("[INFO] Creating Job...")
         create_job_response = api_consumer.create_instant_job(task_info, create_application_response.applicationId, job_config)
 
         if create_job_response.error:
