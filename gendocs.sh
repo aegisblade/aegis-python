@@ -21,8 +21,8 @@ image_name="localhost/$container_name"
 
 rm_dockerfile() {
   echo "cleaning up..."
-  rm -f "$DIR/Dockerfile"
-  docker rm -f $container_name
+  rm -f "$DIR/Dockerfile" || true
+  docker rm -f $container_name || true
 }
 trap rm_dockerfile EXIT
 
